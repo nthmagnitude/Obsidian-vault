@@ -2,8 +2,8 @@
 
 Create beautiful Habit overview with Obsidian bases and the [taskNotes](https://github.com/callumalpass/tasknotes) plugin
 
-![[./Images/Screenshot_20260222_231020.png]]
-![[./Images/Screenshot_20260222_231035.png]]
+![](./Images/Screenshot_20260222_231020.png)
+![](./Images/Screenshot_20260222_231035.png)
 
 ## Installation
 
