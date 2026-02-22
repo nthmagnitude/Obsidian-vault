@@ -1,0 +1,37 @@
+.month-overview {
+    div.bases-cards-label {
+        display: none !important;
+    }
+    .bases-cards-property {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        height: auto !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: visible !important;
+    }
+    .bases-cards-property[data-property="formula.card_recurrence_display"]
+        .bases-cards-line,
+    .bases-cards-property[data-property="formula.progress"] .bases-cards-line,
+    .bases-cards-property[data-property="formula.card_completed_today"]
+        .bases-cards-line {
+        display: block !important;
+        overflow: visible !important;
+        height: fit-content !important;
+    }
+
+    /* --------------------- OPTIONAL --------------------- */
+    div.bases-cards-item {
+        background: var(--background-primary-alt);
+        box-shadow: 0.2rem 0.2rem 0.6rem var(--background-secondary);
+        border: 1px solid var(--background-modifier-border);
+    }
+    div.bases-cards-item:hover {
+        transform: scale(102%);
+        transition: 150ms linear;
+    }
+}

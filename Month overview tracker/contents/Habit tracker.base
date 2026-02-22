@@ -1,0 +1,88 @@
+model:
+  version: 1
+  kind: Table
+  columns: []
+pluginVersion: 1.0.0
+filters:
+  and:
+    - file.hasTag("task")
+formulas:
+  priority: if(priority == "high", "🛑🛑", if(priority == "normal", "🚧🚧", "🟢🟢"))
+  Due: due.relative()
+  scheduled: scheduled.relative()
+  Due date: due.date().format("MMMM DD, YYYY")
+  progress: |-
+    html(
+      "<div style=''><div style='display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-family: sans-serif;'>" +
+      ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map("<b style='font-size: 0.8em; opacity: 0.6;'>" + value + "</b>").join("") +
+      
+      ",".repeat(((((formula.first_day_of_month - date("1970-01-01")).milliseconds / 86400000) + 4) % 7).floor()).split(",").slice(1).map("<div style='height: 20px;'></div>").join("") +
+      
+      ",".repeat(formula.last_day_of_month.day - 1).split(",").map(
+          if(
+            complete_instances.contains(formula.first_day_of_month + (index + "d")),
+            "<div style='background:" + formula.colorf[1] + "; height:20px; line-height:20px; border-radius:4px; font-size:0.7em; color:white;" + if(today().day == (index + 1), "border: 1px solid var(--text-normal)") + "'>" + (index + 1) + "</div>",
+            "<div style='background:" + formula.colorf[0] + "; height:20px; line-height:20px; border-radius:4px; font-size:0.7em; color:white;;" + if(today().day == (index + 1), "border: 1px solid var(--text-normal)") +  "'>" + (index + 1) + "</div>"
+          )
+      ).join("")  +
+      "</div></div>"
+    )
+  recurrencef: recurrence.split(";").filter(value.contains("FREQ") || value.contains("BYDAY") || value.contains("INTERVAL")).map(if(value.contains("FREQ"), value.split("FREQ=")[1], if(value.contains("BYDAY"), value.split("BYDAY=")[1], if(value.contains("INTERVAL="), value.split("INTERVAL=")[1])))).join(";")
+  card_priority: 'html("<strong>" + "Priority: " + formula.priority + "</strong>")'
+  card_completed_today: |-
+    html("<span style='font-weight: 800; display: flex; align-items: center; gap: 6px;'>" + if(formula.recurrencef == "DAILY" || (formula.recurrencef.split(";")[0] == "WEEKLY" && formula.recurrence_days.contains(today().format("dd").lower())),    if(complete_instances.contains(today().date()), 
+                '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Completed today', 
+                '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Due today'
+            ),
+           
+            formula.next_occurence) + 
+    "</span>")
+  card_scheduledf: "html(\"<span style='font-weight: 600'>Scheduled</span>: \" + scheduled.relative())"
+  card_duef: "html(\"<span style='font-weight: 600'>Due</span>: \" +  due.date().format(\"MMMM DD, YYYY\"))"
+  card_last_completed: "html(\"<span style='font-weight: 600'>Last completed</span>: \" + complete_instances[complete_instances.length - 1].date().format(\"DD MMM YYYY\"))"
+  last_day_of_month: today().date() + "1M" - (today().day + "d")
+  first_day_of_month: today().date() - (today().day + "d") + "1d"
+  card_recurrence_display: "html('<div style=\"display: flex; align-items: center; gap: 0.4rem;\">' + '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-repeat-icon lucide-repeat\"><path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/></svg>' + \"<span style='font-weight: 600;'>\" +  if(formula.recurrencef.split(\";\")[0] == \"WEEKLY\", formula.recurrencef.split(\";\")[0].toString().title() + \"<br/>Every: \" + formula.recurrencef.split(\";\")[1].split(\",\").map(value.title()), if(formula.recurrencef.split(\";\").length > 1 && formula.recurrencef.split(\";\")[0] == \"DAILY\", \"Every \" + formula.recurrencef.split(\";\")[1] + \" days\", formula.recurrencef.split(\";\")[0].toString().title()))+ '</span></div>')"
+  next_occurence: if(!formula.recurrence_days.contains(today().format("dd").lower()), "Due next " + formula.recurrence_first_day_map.filter(value.lower().startswith(formula.recurrence_days[0])))
+  recurrence_days: formula.recurrencef.split(";")[1].split(",").map(value.lower())
+  recurrence_first_day_map: '["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]'
+  colorf: if(color, if(color.startsWith("#"), [color + "4d", color + "ff"], if(color.startsWith("rgb"), ["rgba(" + color.split("(")[1].split(")")[0] + ", 0.3)", "rgba(" + color.split("(")[1].split(")")[0] + ", 1)"], ["rgba(" + color + ", 0.3)", "rgba(" + color + ", 1)"])), ["rgba(var(--color-blue-rgb), 0.3)", "rgba(var(--color-blue-rgb), 1)"])
+properties:
+  note.description:
+    displayName: notes
+  file.name:
+    displayName: Task
+views:
+  - type: cards
+    name: Habit tracker
+    filters:
+      and:
+        - contexts.containsAny("@personal", "personal")
+        - or:
+            - type == ["Habit"]
+            - file.hasTag("Habit")
+    order:
+      - file.name
+      - formula.progress
+      - formula.card_priority
+      - formula.card_scheduledf
+      - formula.card_completed_today
+      - formula.card_recurrence_display
+      - formula.settingsf
+    sort:
+      - property: priority
+        direction: ASC
+      - property: scheduled
+        direction: DESC
+      - property: due
+        direction: ASC
+    limit: 7
+    columnSize:
+      file.name: 272
+      formula.progress: 100
+      formula.recurrencef: 461
+      formula.date_range: 215
+    cardSize: 210
+    imageAspectRatio: 0.25
+    rowHeight: extra
+    image: note.cover
