@@ -47,6 +47,8 @@ formulas:
   recurrence_days: formula.recurrencef.split(";")[1].split(",").map(value.lower())
   recurrence_first_day_map: '["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]'
   colorf: if(color, if(color.startsWith("#"), [color + "4d", color + "ff"], if(color.startsWith("rgb"), ["rgba(" + color.split("(")[1].split(")")[0] + ", 0.3)", "rgba(" + color.split("(")[1].split(")")[0] + ", 1)"], ["rgba(" + color + ", 0.3)", "rgba(" + color + ", 1)"])), ["rgba(var(--color-blue-rgb), 0.3)", "rgba(var(--color-blue-rgb), 1)"])
+  card_streak: '"🔥" + if(formula.recurrencef == "DAILY", formula.daily_streak_value, 0) + " day(s) streak"'
+  daily_streak_value: '",".repeat(complete_instances.length).split("").map(complete_instances.contains(today().date() - ((index + 1) + "d"))).reverse().join(";").split("false").reverse()[0].split(";").filter(value == "true").length + if(complete_instances.contains(today().date()), 1, 0)'
 properties:
   note.description:
     displayName: notes
@@ -69,6 +71,7 @@ views:
       - formula.card_completed_today
       - formula.card_recurrence_display
       - formula.settingsf
+      - formula.card_streak
     sort:
       - property: priority
         direction: ASC

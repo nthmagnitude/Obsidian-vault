@@ -5,6 +5,8 @@ Create beautiful Habit overview with Obsidian bases and the [taskNotes](https://
 ![](./Images/Screenshot_20260222_231020.png)
 ![](./Images/Screenshot_20260222_231035.png)
 
+[Changelog](./CHANGELOG.md)
+
 ## Installation
 
 - Download the bases file and place inside your obsidian vault.
